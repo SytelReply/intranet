@@ -1,0 +1,49 @@
+{% extends 'base/base.html' %}
+
+{% block title %}Leave Calendar - NetReply{% endblock %}
+
+{% block page_title %}Leave Calendar{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-body">
+        <div id="calendar" data-events="{{ events_json|escapejs }}"></div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        var calendarEl = document.getElementById('calendar');
+        var eventsData = JSON.parse(calendarEl.getAttribute('data-events')); // Retrieve and parse data
+
+        var calendar = new FullCalendar.Calendar(calendarEl, {
+            initialView: 'dayGridMonth',
+            headerToolbar: {
+                left: 'prev,next today',
+                center: 'title',
+                right: 'dayGridMonth,timeGridWeek,listWeek'
+            },
+            events: eventsData, // Use the variable here
+            eventClick: function(info) {
+                // Display event details in a modal or alert
+                let event = info.event;
+                let props = event.extendedProps;
+                let modalBody = document.getElementById('eventModalBody');
+                modalBody.innerHTML = `
+                    <p><strong>Employee:</strong> ${props.employee}</p>
+                    <p><strong>Status:</strong> ${props.status}</p>
+                    <p><strong>Start Date:</strong> ${event.start.toLocaleDateString()}</p>
+                    <p><strong>End Date:</strong> ${new Date(event.end - 1).toLocaleDateString()}</p> {# Adjust end date back #}
+                    <p><strong>Reason:</strong> ${props.reason || 'N/A'}</p>
+                `;
+                var eventModal = new bootstrap.Modal(document.getElementById('eventModal'));
+                document.getElementById('eventModalTitle').innerText = 'Leave Request Details';
+                eventModal.show();
+            }
+        });
+        calendar.render();
+    });
+</script>
+{% endblock %}

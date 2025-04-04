@@ -1,0 +1,79 @@
+{% extends 'base/base.html' %}
+
+{% block title %}Combined Calendar | NetReply{% endblock %}
+
+{% block page_title %}Combined Calendar{% endblock %}
+
+{% block content %}
+<div class="calendar-container">
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Calendar Legend</h5>
+                    <div class="d-flex flex-wrap mt-3">
+                        <div class="me-4 mb-2">
+                            <div class="d-flex align-items-center">
+                                <div class="me-2" style="width: 15px; height: 15px; background-color: #17a2b8; border-radius: 3px;"></div>
+                                <span>Attendance</span>
+                            </div>
+                        </div>
+                        <div class="me-4 mb-2">
+                            <div class="d-flex align-items-center">
+                                <div class="me-2" style="width: 15px; height: 15px; background-color: #28a745; border-radius: 3px;"></div>
+                                <span>Approved Leave</span>
+                            </div>
+                        </div>
+                        <div class="me-4 mb-2">
+                            <div class="d-flex align-items-center">
+                                <div class="me-2" style="width: 15px; height: 15px; background-color: #ffc107; border-radius: 3px;"></div>
+                                <span>Pending Leave</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="d-flex justify-content-end">
+                <a href="{% url 'attendance_calendar' %}" class="btn btn-outline-primary me-2">
+                    <i class="fas fa-calendar-check me-1"></i> Attendance Only
+                </a>
+                <a href="{% url 'leave_calendar' %}" class="btn btn-outline-success">
+                    <i class="fas fa-calendar-alt me-1"></i> Leave Only
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    <div id="combined-calendar"></div>
+</div>
+
+<!-- Event Modal -->
+<div class="modal fade" id="eventModal" tabindex="-1" aria-labelledby="eventModalTitle" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="eventModalTitle">Event Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="eventModalBody">
+                <!-- Event details will be inserted here -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize combined calendar
+        var events = {{ events_json|safe }};
+        initCombinedCalendar(events);
+    });
+</script>
+{% endblock %}

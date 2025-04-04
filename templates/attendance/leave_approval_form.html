@@ -1,0 +1,32 @@
+{% extends 'base/base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}Approve Leave Request - NetReply{% endblock %}
+
+{% block page_title %}Approve/Reject Leave Request{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <h5 class="mb-0">Leave Request Details</h5>
+    </div>
+    <div class="card-body">
+        <p><strong>Employee:</strong> {{ leave_request.employee.get_full_name }}</p>
+        <p><strong>Start Date:</strong> {{ leave_request.start_date|date:"Y-m-d" }}</p>
+        <p><strong>End Date:</strong> {{ leave_request.end_date|date:"Y-m-d" }}</p>
+        <p><strong>Days Requested:</strong> {{ leave_request.days }}</p>
+        <p><strong>Reason:</strong> {{ leave_request.reason }}</p>
+        <p><strong>Status:</strong> <span class="badge bg-warning">{{ leave_request.get_status_display }}</span></p>
+        <hr>
+        <form method="post">
+            {% csrf_token %}
+            {{ form|crispy }}
+            <div class="mt-4">
+                <button type="submit" name="action" value="approve" class="btn btn-success">Approve</button>
+                <button type="submit" name="action" value="reject" class="btn btn-danger">Reject</button>
+                <a href="{% url 'pending_leave_approvals' %}" class="btn btn-secondary">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

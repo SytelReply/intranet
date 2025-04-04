@@ -1,0 +1,163 @@
+{% extends 'base/base.html' %}
+
+{% block title %}Dashboard | NetReply{% endblock %}
+
+{% block page_title %}Dashboard{% endblock %}
+
+{% block content %}
+<div class="row">
+    <!-- Holiday Information -->
+    <div class="col-md-6 col-lg-3 mb-4">
+        <div class="dashboard-card card bg-white">
+            <div class="card-body">
+                <h5 class="card-title text-primary">
+                    <i class="fas fa-umbrella-beach me-2"></i>Holiday Balance
+                </h5>
+                <div class="d-flex justify-content-between align-items-center mt-3">
+                    <div class="card-value">{{ holidays_left }}</div>
+                    <div class="text-muted">/ {{ holidays_total }} days</div>
+                </div>
+                <div class="progress mt-2" style="height: 5px;">
+                    <div class="progress-bar" role="progressbar" style="width: {{ holidays_left|divisibleby:holidays_total|floatformat:0 }}%;" 
+                         aria-valuenow="{{ holidays_left }}" aria-valuemin="0" aria-valuemax="{{ holidays_total }}"></div>
+                </div>
+                <div class="mt-3">
+                    <a href="{% url 'leave_request_create' %}" class="btn btn-sm btn-outline-primary">Request Leave</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Attendance Count -->
+    <div class="col-md-6 col-lg-3 mb-4">
+        <div class="dashboard-card card bg-white">
+            <div class="card-body">
+                <h5 class="card-title text-success">
+                    <i class="fas fa-calendar-check me-2"></i>Attendance
+                </h5>
+                <div class="d-flex justify-content-between align-items-center mt-3">
+                    <div class="card-value">{{ attendance_count }}</div>
+                    <div class="text-muted">records</div>
+                </div>
+                <div class="mt-3">
+                    <a href="{% url 'attendance_create' %}" class="btn btn-sm btn-outline-success">Record Attendance</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Leave Requests -->
+    <div class="col-md-6 col-lg-3 mb-4">
+        <div class="dashboard-card card bg-white">
+            <div class="card-body">
+                <h5 class="card-title text-warning">
+                    <i class="fas fa-plane-departure me-2"></i>Leave Requests
+                </h5>
+                <div class="d-flex justify-content-between align-items-center mt-3">
+                    <div>
+                        <div class="d-flex align-items-center">
+                            <div class="me-2" style="width: 10px; height: 10px; background-color: #ffc107; border-radius: 50%;"></div>
+                            <span>Pending: {{ leave_pending }}</span>
+                        </div>
+                        <div class="d-flex align-items-center mt-1">
+                            <div class="me-2" style="width: 10px; height: 10px; background-color: #28a745; border-radius: 50%;"></div>
+                            <span>Approved: {{ leave_approved }}</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-3">
+                    <a href="{% url 'my_leave_requests' %}" class="btn btn-sm btn-outline-warning">View Requests</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Pending Approvals (for managers) -->
+    {% if pending_approvals > 0 %}
+    <div class="col-md-6 col-lg-3 mb-4">
+        <div class="dashboard-card card bg-white">
+            <div class="card-body">
+                <h5 class="card-title text-danger">
+                    <i class="fas fa-clipboard-check me-2"></i>Pending Approvals
+                </h5>
+                <div class="d-flex justify-content-between align-items-center mt-3">
+                    <div class="card-value">{{ pending_approvals }}</div>
+                    <div class="text-muted">requests</div>
+                </div>
+                <div class="mt-3">
+                    <a href="{% url 'pending_leave_approvals' %}" class="btn btn-sm btn-outline-danger">Review</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Calendar Preview -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="calendar-container">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h4>Upcoming Events</h4>
+                <div>
+                    <a href="{% url 'combined_calendar' %}" class="btn btn-sm btn-primary">
+                        <i class="fas fa-calendar-alt me-1"></i> View Full Calendar
+                    </a>
+                </div>
+            </div>
+            <div id="dashboard-calendar" style="height: 400px;"></div>
+        </div>
+    </div>
+</div>
+
+<!-- Notifications -->
+{% if unread_notifications %}
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Recent Notifications</h5>
+                <a href="{% url 'notification_list' %}" class="btn btn-sm btn-link">View All</a>
+            </div>
+            <div class="list-group list-group-flush">
+                {% for notification in unread_notifications %}
+                <div id="notification-{{ notification.id }}" class="notification-item list-group-item list-group-item-action unread">
+                    <div class="d-flex w-100 justify-content-between">
+                        <h6 class="mb-1">{{ notification.message }}</h6>
+                        <small class="notification-time">{{ notification.created_at|timesince }} ago</small>
+                    </div>
+                    <div class="d-flex justify-content-end mt-2">
+                        <button onclick="markNotificationRead({{ notification.id }})" class="btn btn-sm btn-outline-secondary">
+                            Mark as Read
+                        </button>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize dashboard calendar
+        var calendarEl = document.getElementById('dashboard-calendar');
+        if (calendarEl) {
+            var calendar = new FullCalendar.Calendar(calendarEl, {
+                initialView: 'dayGridWeek',
+                headerToolbar: {
+                    left: 'prev,next today',
+                    center: 'title',
+                    right: 'dayGridWeek,listWeek'
+                },
+                events: '/api/dashboard-events/',  // This would be an API endpoint to get events
+                height: 'auto'
+            });
+            calendar.render();
+        }
+    });
+</script>
+{% endblock %}

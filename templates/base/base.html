@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}NetReply{% endblock %}</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <!-- FullCalendar CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/fullcalendar@5.10.1/main.min.css" rel="stylesheet">
+    <!-- Custom CSS -->
+    <link href="/static/css/style.css" rel="stylesheet">
+    
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            {% if user.is_authenticated %}
+            <!-- Sidebar -->
+            <div class="col-md-3 col-lg-2 d-md-block sidebar collapse">
+                <div class="sidebar-logo d-flex align-items-center">
+                    <h4>NetReply</h4>
+                </div>
+                
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.path == '/' %}active{% endif %}" href="{% url 'dashboard' %}">
+                            <i class="fas fa-tachometer-alt"></i> Dashboard
+                        </a>
+                    </li>
+                    
+                    <div class="sidebar-heading">Attendance</div>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.path == '/attendance/record/' %}active{% endif %}" href="{% url 'attendance_create' %}">
+                            <i class="fas fa-calendar-check"></i> Record Attendance
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.path == '/attendance/calendar/' %}active{% endif %}" href="{% url 'attendance_calendar' %}">
+                            <i class="fas fa-calendar"></i> Attendance Calendar
+                        </a>
+                    </li>
+                    
+                    <div class="sidebar-heading">Leave</div>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.path == '/attendance/leave/request/' %}active{% endif %}" href="{% url 'leave_request_create' %}">
+                            <i class="fas fa-plane-departure"></i> Request Leave
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.path == '/attendance/leave/my-requests/' %}active{% endif %}" href="{% url 'my_leave_requests' %}">
+                            <i class="fas fa-list"></i> My Leave Requests
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.path == '/attendance/leave/calendar/' %}active{% endif %}" href="{% url 'leave_calendar' %}">
+                            <i class="fas fa-calendar-alt"></i> Leave Calendar
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.path == '/attendance/combined-calendar/' %}active{% endif %}" href="{% url 'combined_calendar' %}">
+                            <i class="fas fa-calendar-week"></i> Combined Calendar
+                        </a>
+                    </li>
+                    
+                    {% if user.is_admin or user.is_superuser %}
+                    <div class="sidebar-heading">Administration</div>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.path == '/employees/' %}active{% endif %}" href="{% url 'employee_list' %}">
+                            <i class="fas fa-users"></i> Employees
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.path == '/titles/' %}active{% endif %}" href="{% url 'title_list' %}">
+                            <i class="fas fa-tags"></i> Titles
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.path == '/settings/' %}active{% endif %}" href="{% url 'settings' %}">
+                            <i class="fas fa-cog"></i> Settings
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.path == '/attendance/reports/' %}active{% endif %}" href="{% url 'reports' %}">
+                            <i class="fas fa-chart-bar"></i> Reports
+                        </a>
+                    </li>
+                    {% endif %}
+                    
+                    {% if user.team_members.exists %}
+                    <div class="sidebar-heading">Manager</div>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.path == '/attendance/leave/pending-approvals/' %}active{% endif %}" href="{% url 'pending_leave_approvals' %}">
+                            <i class="fas fa-clipboard-check"></i> Pending Approvals
+                        </a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </div>
+            
+            <!-- Main content -->
+            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                    <h1 class="h2">{% block page_title %}Dashboard{% endblock %}</h1>
+                    <div class="btn-toolbar mb-2 mb-md-0">
+                        <div class="dropdown">
+                            <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="fas fa-user"></i> {{ user.get_full_name }}
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                                <li><a class="dropdown-item" href="{% url 'profile' %}"><i class="fas fa-id-card"></i> Profile</a></li>
+                                <li><a class="dropdown-item" href="{% url 'notification_list' %}"><i class="fas fa-bell"></i> Notifications</a></li>
+                                <li><a class="dropdown-item" href="{% url 'password_change' %}"><i class="fas fa-key"></i> Change Password</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" href="{% url 'logout' %}"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Messages -->
+                {% if messages %}
+                <div class="messages">
+                    {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+                
+                <!-- Page content -->
+                <div class="main-content">
+                    {% block content %}{% endblock %}
+                </div>
+                
+                <!-- Footer -->
+                <footer class="footer">
+                    <div class="container">
+                        <span>&copy; {% now "Y" %} NetReply. All rights reserved.</span>
+                    </div>
+                </footer>
+            </main>
+            {% else %}
+            <!-- Login page content -->
+            <main class="col-12">
+                {% block login_content %}{% endblock %}
+            </main>
+            {% endif %}
+        </div>
+    </div>
+    
+    <!-- Event Modal -->
+    <div class="modal fade" id="eventModal" tabindex="-1" aria-labelledby="eventModalTitle" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="eventModalTitle">Event Details</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" id="eventModalBody">
+                    <!-- Event details will be inserted here -->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- FullCalendar JS -->
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.10.1/main.min.js"></script>
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.0/dist/chart.min.js"></script>
+    <!-- Custom JS -->
+    <script src="/static/js/script.js"></script>
+    
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,47 @@
+{% extends 'base/base.html' %}
+
+{% block title %}{{ employee.get_full_name }} - NetReply{% endblock %}
+
+{% block page_title %}Employee Details{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h5 class="mb-0">{{ employee.get_full_name }}</h5>
+        {% if request.user.is_admin or request.user.is_superuser or request.user == employee %}
+        <a href="{% url 'employee_update' employee.pk %}" class="btn btn-sm btn-outline-primary">
+            <i class="fas fa-edit"></i> Edit
+        </a>
+        {% endif %}
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-6">
+                <p><strong>Email:</strong> {{ employee.email }}</p>
+                <p><strong>Mobile:</strong> {{ employee.mobile|default:"N/A" }}</p>
+                <p><strong>Title:</strong> {{ employee.title.name|default:"N/A" }}</p>
+                <p><strong>Manager:</strong> {{ employee.manager.get_full_name|default:"N/A" }}</p>
+            </div>
+            <div class="col-md-6">
+                <p><strong>Total Holidays:</strong> {{ employee.holidays_total }} days</p>
+                <p><strong>Holidays Left:</strong> {{ employee.holidays_left }} days</p>
+                <p><strong>Date Joined:</strong> {{ employee.date_joined|date:"Y-m-d" }}</p>
+                <p><strong>Last Login:</strong> {{ employee.last_login|date:"Y-m-d H:i"|default:"Never" }}</p>
+            </div>
+        </div>
+        <hr>
+        <h5>Permissions</h5>
+        <p><strong>Staff:</strong> {% if employee.is_staff %}<i class="fas fa-check text-success"></i>{% else %}<i class="fas fa-times text-danger"></i>{% endif %}</p>
+        <p><strong>Admin:</strong> {% if employee.is_admin %}<i class="fas fa-check text-success"></i>{% else %}<i class="fas fa-times text-danger"></i>{% endif %}</p>
+        <p><strong>Superuser:</strong> {% if employee.is_superuser %}<i class="fas fa-check text-success"></i>{% else %}<i class="fas fa-times text-danger"></i>{% endif %}</p>
+        <p><strong>Active:</strong> {% if employee.is_active %}<i class="fas fa-check text-success"></i>{% else %}<i class="fas fa-times text-danger"></i>{% endif %}</p>
+    </div>
+</div>
+
+{% if request.user == employee %}
+<div class="mt-4">
+    <a href="{% url 'password_change' %}" class="btn btn-secondary">Change Password</a>
+</div>
+{% endif %}
+
+{% endblock %}

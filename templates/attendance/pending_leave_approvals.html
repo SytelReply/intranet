@@ -1,0 +1,48 @@
+{% extends 'base/base.html' %}
+
+{% block title %}Pending Leave Approvals | NetReply{% endblock %}
+
+{% block page_title %}Pending Leave Approvals{% endblock %}
+
+{% block content %}
+<div class="table-container">
+    {% if pending_requests %}
+    <div class="table-responsive">
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th>Employee</th>
+                    <th>Period</th>
+                    <th>Duration</th>
+                    <th>Reason</th>
+                    <th>Requested On</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for request in pending_requests %}
+                <tr>
+                    <td>{{ request.employee.get_full_name }}</td>
+                    <td>{{ request.start_date|date:"M d, Y" }} - {{ request.end_date|date:"M d, Y" }}</td>
+                    <td>
+                        {% with days=request.end_date|timeuntil:request.start_date|split:" " %}
+                        {{ days.0|add:"1" }} day{% if days.0|add:"1" != "1" %}s{% endif %}
+                        {% endwith %}
+                    </td>
+                    <td>{{ request.reason|truncatechars:50|default:"Not specified" }}</td>
+                    <td>{{ request.created_at|date:"M d, Y" }}</td>
+                    <td>
+                        <a href="{% url 'leave_request_approve' request.id %}" class="btn btn-sm btn-primary">Review</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="alert alert-info">
+        <i class="fas fa-info-circle me-2"></i> No pending leave requests to approve.
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

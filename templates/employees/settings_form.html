@@ -1,0 +1,28 @@
+{% extends 'base/base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}Global Settings - NetReply{% endblock %}
+
+{% block page_title %}Global Settings{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <h5 class="mb-0">Update Global Settings</h5>
+    </div>
+    <div class="card-body">
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            {{ form|crispy }}
+            <div class="mt-4">
+                <button type="submit" class="btn btn-primary">Save Settings</button>
+            </div>
+        </form>
+        {% if settings.company_logo %}
+        <hr>
+        <h5>Current Logo</h5>
+        <img src="{{ settings.company_logo.url }}" alt="Company Logo" style="max-height: 100px; margin-top: 10px;">
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

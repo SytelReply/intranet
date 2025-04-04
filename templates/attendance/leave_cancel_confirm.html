@@ -1,0 +1,24 @@
+{% extends 'base/base.html' %}
+
+{% block title %}Confirm Cancel Leave - NetReply{% endblock %}
+
+{% block page_title %}Confirm Cancel Leave Request{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <h5 class="mb-0">Confirm Cancellation</h5>
+    </div>
+    <div class="card-body">
+        <p>Are you sure you want to cancel your leave request from <strong>{{ leave_request.start_date|date:"Y-m-d" }}</strong> to <strong>{{ leave_request.end_date|date:"Y-m-d" }}</strong>?</p>
+        {% if leave_request.status == 'approved' %}
+        <p class="text-info">If approved, the {{ leave_request.days }} holiday day(s) will be added back to your balance.</p>
+        {% endif %}
+        <form method="post">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-danger">Yes, Cancel Request</button>
+            <a href="{% url 'my_leave_requests' %}" class="btn btn-secondary">No, Keep Request</a>
+        </form>
+    </div>
+</div>
+{% endblock %}
